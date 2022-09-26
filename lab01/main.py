@@ -1,11 +1,19 @@
 #!/usr/bin/env pybricks-micropython
+
+# Yumo Bai PID: 730480742
+# Peiyu Li PID: 730434819
+
 from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import Motor, TouchSensor, UltrasonicSensor, GyroSensor
-from pybricks.parameters import Port, Button, Stop, Direction
+from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,InfraredSensor, UltrasonicSensor, GyroSensor)
+from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch
 import math
 
-# Initialize the EV3 Brick.
+# This program requires LEGO EV3 MicroPython v2.0 or higher.
+# Click "Open user guide" on the EV3 extension tab for more information.
+
+
+# Create your objects here.
 ev3 = EV3Brick()
 
 # Initialize the motors and sensors.
@@ -17,79 +25,72 @@ touch_2 = TouchSensor(Port.S3)
 gyro = GyroSensor(Port.S4)
 stopWatch = StopWatch()
 
+left_motor.run(280)
+right_motor.run(280)
 
-speed = 360
-d = 56
-c = d * math.pi
-time = 1200 / c * 360 / speed * 1000
+def angle(distance):
+    return distance/(5.5*math.pi)*360
 
-task = [True, False, False]
-gyro.reset_angle(0)
-print(gyro.angle())
-while True:
-    if Button.CENTER in ev3.buttons.pressed() and task[0] == True:
-        stopWatch.reset()
-        
-        while stopWatch.time() < time:
-            # print(stopWatch.time())
-            print(gyro.angle())
-            ori_diff = gyro.angle()
-            if ori_diff >= -3 and ori_diff <= 3:
-                stopWatch.resume()
-                left_motor.run(360) 
-                right_motor.run(360)
-            elif ori_diff < -3:
-                stopWatch.pause()
-                # print(stopWatch.time())
-                while gyro.angle() < -2: 
-                    left_motor.run(10) 
-                    right_motor.run(-10)
-            else:
-                stopWatch.pause()
-                # print(stopWatch.time())
-                while gyro.angle() > 4:
-                    left_motor.run(-10)
-                    right_motor.run(10)
-        if gyro.angle() < -3:
-            while gyro.angle() < -2: 
-                left_motor.run(10) 
-                right_motor.run(-10)
-        if gyro.angle() > 3:
-            while gyro.angle() > 4:
-                left_motor.run(-10)
-                right_motor.run(10)
-                
-        left_motor.brake()
-        right_motor.brake()
-        ev3.speaker.beep()
-        task[0] = False
-    #     task[1] = True
-    # if Button.CENTER in ev3.buttons.pressed() and task[1] == True:
-    #     print("doing task 2")
-    #     while ultra.distance() > 501:
-    #         left_motor.run(100)
-    #         right_motor.run(100)
-    #     left_motor.brake()
-    #     right_motor.brake()
-    #     print(ultra.distance())
-    #     wait(10)
-    #     ev3.speaker.beep()
-    #     task[1] = False
-    #     task[2] = True
-    # if Button.CENTER in ev3.buttons.pressed() and task[2] == True:
-    #     print("doing task 3")
-    #     while not touch_1.pressed() or not touch_2.pressed():
-    #         left_motor.run(360)
-    #         right_motor.run(360)
-    #     left_motor.run(0)
-    #     right_motor.run(0)
-    #     wait(10)
-    #     while ultra.distance() <= 499:
-    #         left_motor.run(-100)
-    #         right_motor.run(-100)
-    #     left_motor.run(0)
-    #     right_motor.run(0)
-    #     print(ultra.distance())
-    #     task[2] = False
-    # if not task[0] and not task[1] and not task[2]:
-    #     break
+def correction():
+    while(left_motor.angle()<right_motor.angle()):
+        left_motor.run_angle(5, right_motor.angle()-left_motor.angle(), then=Stop.HOLD, wait=True)
+    while(left_motor.angle()>right_motor.angle()):
+        right_motor.run_angle(5, abs(right_motor.angle()-left_motor.angle()), then=Stop.HOLD, wait=True)
+    right_motor.brake()
+    left_motor.brake()
+    
+
+
+while left_motor.angle()<=angle(120) and right_motor.angle()<=angle(120):
+     print(left_motor.angle(),'left')
+    # print(right_motor.angle(),'right')
+left_motor.brake()
+right_motor.brake()
+correction()
+
+pressed = Button.CENTER in ev3.buttons.pressed()
+while not pressed:
+    pressed = Button.CENTER in ev3.buttons.pressed()
+    
+#move to 50cm mark:
+left_motor.run(280)
+right_motor.run(280)
+while(ultra.distance()>=500):
+    print(ultra.distance())
+
+left_motor.brake()
+right_motor.brake()
+
+pressed = Button.CENTER in ev3.buttons.pressed()
+while not pressed:
+    pressed = Button.CENTER in ev3.buttons.pressed()
+    
+#torch sensor:
+left_motor.run(280)
+right_motor.run(280)
+while not (touch_1.pressed() or touch_2.pressed()):
+    wait(10)
+
+left_motor.brake()
+right_motor.brake()
+ev3.speaker.beep()
+
+
+pressed = Button.CENTER in ev3.buttons.pressed()
+while not pressed: 
+    pressed = Button.CENTER in ev3.buttons.pressed()
+    
+#reverse by 50cm
+left_motor.reset_angle(0)
+right_motor.reset_angle(0)
+left_motor.run(-280)
+right_motor.run(-280)
+
+while left_motor.angle()>=angle(-50) and right_motor.angle()>=angle(-50):
+    print(left_motor.angle(),'left')
+    print(right_motor.angle(),'right')
+left_motor.brake()
+right_motor.brake()
+
+# Write your program here.
+ev3.speaker.beep()
