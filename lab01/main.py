@@ -25,8 +25,7 @@ touch_2 = TouchSensor(Port.S3)
 gyro = GyroSensor(Port.S4)
 stopWatch = StopWatch()
 
-left_motor.run(240)
-right_motor.run(240)
+
 
 def angle(distance):
     return distance/(5.5*math.pi)*360
@@ -40,7 +39,15 @@ def correction():
     left_motor.brake()
     
 
+pressed = Button.CENTER in ev3.buttons.pressed()
+while not pressed:
+    pressed = Button.CENTER in ev3.buttons.pressed()    
+left_motor.run(240)
+right_motor.run(240)
 
+while left_motor.angle()<=angle(119) and right_motor.angle()<=angle(119):
+     print(left_motor.angle(),'left')
+     print(right_motor.angle(),'right')
 while left_motor.angle()<=angle(120) and right_motor.angle()<=angle(120):
      print(left_motor.angle(),'left')
      print(right_motor.angle(),'right')
@@ -56,13 +63,14 @@ while not pressed:
 #move to 50cm mark:
 left_motor.run(240)
 right_motor.run(240)
-while(ultra.distance()>=505):
+while(ultra.distance()>=520):
     print(ultra.distance())
 wait(10)
-while(ultra.distance()>=503):
+while(ultra.distance()>=515):
     print('distance checked')
 left_motor.brake()
 right_motor.brake()
+correction()
 ev3.speaker.beep()
 
 pressed = Button.CENTER in ev3.buttons.pressed()
@@ -77,13 +85,8 @@ while not (touch_1.pressed() or touch_2.pressed()):
 
 left_motor.brake()
 right_motor.brake()
-ev3.speaker.beep()
+wait(300)
 
-
-pressed = Button.CENTER in ev3.buttons.pressed()
-while not pressed: 
-    pressed = Button.CENTER in ev3.buttons.pressed()
-    
 #reverse by 50cm
 left_motor.reset_angle(0)
 right_motor.reset_angle(0)
