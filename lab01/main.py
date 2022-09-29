@@ -85,7 +85,7 @@ while not (touch_1.pressed() or touch_2.pressed()):
 
 left_motor.brake()
 right_motor.brake()
-wait(300)
+wait(230)
 
 #reverse by 50cm
 left_motor.reset_angle(0)
